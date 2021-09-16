@@ -30,7 +30,7 @@
       fetch_data('roles');
    });
 
-   $(document).on('click', 'div[data-name="hs_hs_fetch_circles"] input[type="radio"]', function(){
+   $(document).on('click', 'div[data-name="hs_fetch_circles"] input[type="radio"]', function(){
       fetch_data('circles');
    });
 
