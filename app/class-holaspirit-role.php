@@ -17,12 +17,14 @@ namespace holaspirit;
  */
 class Holaspirit_Role  {
 	private $organisation;
+	private $path;
 
 	/**
 	 * Class constructor
 	 */
 	public function __construct() {
 		$this->organisation = get_option('hs_organisation', '60b4a127e26ec6769111ec36'); //@todo hier nog iets voor maken wat dat fetched
+		$this->path = "api/organizations/$this->organisation/roles";
 		add_action( 'wp_ajax_fetch_roles', array( $this, 'fetch_roles' ), 10, 0 );
 	}
 
@@ -66,13 +68,13 @@ class Holaspirit_Role  {
 	public function get_roles(){
 		$instance = new Holaspirit_API();
 		$query = array("filter" => "role", "view" => "light", "page" => 1);
-		$result = $instance->get("api/organizations/$this->organisation/roles", $query);
+		$result = $instance->get($this->path, $query);
 
 		$data = $result['data'];
 
 		while($result['pagination']['nextPage'] !== null){
 			$query['page']++;
-			$result = $instance->get("api/organizations/$this->organisation/roles", $query);
+			$result = $instance->get($this->path, $query);
 			$data = array_merge($data, $result['data']);
 		}
 
@@ -115,7 +117,7 @@ class Holaspirit_Role  {
 			'post_status' => 'publish',
 		));
 
-		update_field('purpose', $item['purpose'], $role_id);
+		update_field('purpose', strip_tags($item['purpose']), $role_id);
 		update_post_meta($role_id, 'hs_version', $item['version']);
 	}
 
@@ -126,7 +128,7 @@ class Holaspirit_Role  {
 			'post_status' => 'publish',
 		));
 
-		update_field('purpose', $item['purpose'], $id);
+		update_field('purpose', strip_tags($item['purpose']), $id);
 		update_post_meta($id, 'hs_id', $item['id']);
 		update_post_meta($id, 'hs_version', $item['version']);
 
@@ -151,5 +153,5 @@ class Holaspirit_Role  {
 //		update_field('accountabilities', $accountabilities, $id);
 //		//Tot hier
 //
-//		//@todo hier ook nog aan de juiste category/circle toekennen.
+//		//@todo ook nog aan de juiste category/circle toekennen.
 //		//@todo $item['assignedMembers'] koppelen aan juiste users via een multiselect
