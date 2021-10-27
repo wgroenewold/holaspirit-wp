@@ -8,77 +8,72 @@ namespace GuzzleHttp\Promise;
  * Thenning off of this promise will invoke the onFulfilled callback
  * immediately and ignore other callbacks.
  */
-class FulfilledPromise implements PromiseInterface
-{
-    private $value;
+class FulfilledPromise implements PromiseInterface {
 
-    public function __construct($value)
-    {
-        if (is_object($value) && method_exists($value, 'then')) {
-            throw new \InvalidArgumentException(
-                'You cannot create a FulfilledPromise with a promise.'
-            );
-        }
+	private $value;
 
-        $this->value = $value;
-    }
+	public function __construct( $value ) {
+		if ( is_object( $value ) && method_exists( $value, 'then' ) ) {
+			throw new \InvalidArgumentException(
+				'You cannot create a FulfilledPromise with a promise.'
+			);
+		}
 
-    public function then(
-        callable $onFulfilled = null,
-        callable $onRejected = null
-    ) {
-        // Return itself if there is no onFulfilled function.
-        if (!$onFulfilled) {
-            return $this;
-        }
+		$this->value = $value;
+	}
 
-        $queue = Utils::queue();
-        $p = new Promise([$queue, 'run']);
-        $value = $this->value;
-        $queue->add(static function () use ($p, $value, $onFulfilled) {
-            if (Is::pending($p)) {
-                try {
-                    $p->resolve($onFulfilled($value));
-                } catch (\Throwable $e) {
-                    $p->reject($e);
-                } catch (\Exception $e) {
-                    $p->reject($e);
-                }
-            }
-        });
+	public function then(
+		callable $onFulfilled = null,
+		callable $onRejected = null
+	) {
+		// Return itself if there is no onFulfilled function.
+		if ( ! $onFulfilled ) {
+			return $this;
+		}
 
-        return $p;
-    }
+		$queue = Utils::queue();
+		$p     = new Promise( array( $queue, 'run' ) );
+		$value = $this->value;
+		$queue->add(
+			static function () use ( $p, $value, $onFulfilled ) {
+				if ( Is::pending( $p ) ) {
+					try {
+						$p->resolve( $onFulfilled( $value ) );
+					} catch ( \Throwable $e ) {
+						$p->reject( $e );
+					} catch ( \Exception $e ) {
+						$p->reject( $e );
+					}
+				}
+			}
+		);
 
-    public function otherwise(callable $onRejected)
-    {
-        return $this->then(null, $onRejected);
-    }
+		return $p;
+	}
 
-    public function wait($unwrap = true, $defaultDelivery = null)
-    {
-        return $unwrap ? $this->value : null;
-    }
+	public function otherwise( callable $onRejected ) {
+		return $this->then( null, $onRejected );
+	}
 
-    public function getState()
-    {
-        return self::FULFILLED;
-    }
+	public function wait( $unwrap = true, $defaultDelivery = null ) {
+		return $unwrap ? $this->value : null;
+	}
 
-    public function resolve($value)
-    {
-        if ($value !== $this->value) {
-            throw new \LogicException("Cannot resolve a fulfilled promise");
-        }
-    }
+	public function getState() {
+		return self::FULFILLED;
+	}
 
-    public function reject($reason)
-    {
-        throw new \LogicException("Cannot reject a fulfilled promise");
-    }
+	public function resolve( $value ) {
+		if ( $value !== $this->value ) {
+			throw new \LogicException( 'Cannot resolve a fulfilled promise' );
+		}
+	}
 
-    public function cancel()
-    {
-        // pass
-    }
+	public function reject( $reason ) {
+		throw new \LogicException( 'Cannot reject a fulfilled promise' );
+	}
+
+	public function cancel() {
+		// pass
+	}
 }

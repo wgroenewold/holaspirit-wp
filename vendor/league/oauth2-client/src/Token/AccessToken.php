@@ -22,222 +22,214 @@ use RuntimeException;
  *
  * @link http://tools.ietf.org/html/rfc6749#section-1.4 Access Token (RFC 6749, §1.4)
  */
-class AccessToken implements AccessTokenInterface, ResourceOwnerAccessTokenInterface
-{
-    /**
-     * @var string
-     */
-    protected $accessToken;
+class AccessToken implements AccessTokenInterface, ResourceOwnerAccessTokenInterface {
 
-    /**
-     * @var int
-     */
-    protected $expires;
+	/**
+	 * @var string
+	 */
+	protected $accessToken;
 
-    /**
-     * @var string
-     */
-    protected $refreshToken;
+	/**
+	 * @var int
+	 */
+	protected $expires;
 
-    /**
-     * @var string
-     */
-    protected $resourceOwnerId;
+	/**
+	 * @var string
+	 */
+	protected $refreshToken;
 
-    /**
-     * @var array
-     */
-    protected $values = [];
+	/**
+	 * @var string
+	 */
+	protected $resourceOwnerId;
 
-    /**
-     * @var int
-     */
-    private static $timeNow;
+	/**
+	 * @var array
+	 */
+	protected $values = array();
 
-    /**
-     * Set the time now. This should only be used for testing purposes.
-     *
-     * @param int $timeNow the time in seconds since epoch
-     * @return void
-     */
-    public static function setTimeNow($timeNow)
-    {
-        self::$timeNow = $timeNow;
-    }
+	/**
+	 * @var int
+	 */
+	private static $timeNow;
 
-    /**
-     * Reset the time now if it was set for test purposes.
-     *
-     * @return void
-     */
-    public static function resetTimeNow()
-    {
-        self::$timeNow = null;
-    }
+	/**
+	 * Set the time now. This should only be used for testing purposes.
+	 *
+	 * @param int $timeNow the time in seconds since epoch
+	 * @return void
+	 */
+	public static function setTimeNow( $timeNow ) {
+		self::$timeNow = $timeNow;
+	}
 
-    /**
-     * @return int
-     */
-    public function getTimeNow()
-    {
-        return self::$timeNow ? self::$timeNow : time();
-    }
+	/**
+	 * Reset the time now if it was set for test purposes.
+	 *
+	 * @return void
+	 */
+	public static function resetTimeNow() {
+		self::$timeNow = null;
+	}
 
-    /**
-     * Constructs an access token.
-     *
-     * @param array $options An array of options returned by the service provider
-     *     in the access token request. The `access_token` option is required.
-     * @throws InvalidArgumentException if `access_token` is not provided in `$options`.
-     */
-    public function __construct(array $options = [])
-    {
-        if (empty($options['access_token'])) {
-            throw new InvalidArgumentException('Required option not passed: "access_token"');
-        }
+	/**
+	 * @return int
+	 */
+	public function getTimeNow() {
+		return self::$timeNow ? self::$timeNow : time();
+	}
 
-        $this->accessToken = $options['access_token'];
+	/**
+	 * Constructs an access token.
+	 *
+	 * @param array $options An array of options returned by the service provider
+	 *     in the access token request. The `access_token` option is required.
+	 * @throws InvalidArgumentException if `access_token` is not provided in `$options`.
+	 */
+	public function __construct( array $options = array() ) {
+		if ( empty( $options['access_token'] ) ) {
+			throw new InvalidArgumentException( 'Required option not passed: "access_token"' );
+		}
 
-        if (!empty($options['resource_owner_id'])) {
-            $this->resourceOwnerId = $options['resource_owner_id'];
-        }
+		$this->accessToken = $options['access_token'];
 
-        if (!empty($options['refresh_token'])) {
-            $this->refreshToken = $options['refresh_token'];
-        }
+		if ( ! empty( $options['resource_owner_id'] ) ) {
+			$this->resourceOwnerId = $options['resource_owner_id'];
+		}
 
-        // We need to know when the token expires. Show preference to
-        // 'expires_in' since it is defined in RFC6749 Section 5.1.
-        // Defer to 'expires' if it is provided instead.
-        if (isset($options['expires_in'])) {
-            if (!is_numeric($options['expires_in'])) {
-                throw new \InvalidArgumentException('expires_in value must be an integer');
-            }
+		if ( ! empty( $options['refresh_token'] ) ) {
+			$this->refreshToken = $options['refresh_token'];
+		}
 
-            $this->expires = $options['expires_in'] != 0 ? $this->getTimeNow() + $options['expires_in'] : 0;
-        } elseif (!empty($options['expires'])) {
-            // Some providers supply the seconds until expiration rather than
-            // the exact timestamp. Take a best guess at which we received.
-            $expires = $options['expires'];
+		// We need to know when the token expires. Show preference to
+		// 'expires_in' since it is defined in RFC6749 Section 5.1.
+		// Defer to 'expires' if it is provided instead.
+		if ( isset( $options['expires_in'] ) ) {
+			if ( ! is_numeric( $options['expires_in'] ) ) {
+				throw new \InvalidArgumentException( 'expires_in value must be an integer' );
+			}
 
-            if (!$this->isExpirationTimestamp($expires)) {
-                $expires += $this->getTimeNow();
-            }
+			$this->expires = $options['expires_in'] != 0 ? $this->getTimeNow() + $options['expires_in'] : 0;
+		} elseif ( ! empty( $options['expires'] ) ) {
+			// Some providers supply the seconds until expiration rather than
+			// the exact timestamp. Take a best guess at which we received.
+			$expires = $options['expires'];
 
-            $this->expires = $expires;
-        }
+			if ( ! $this->isExpirationTimestamp( $expires ) ) {
+				$expires += $this->getTimeNow();
+			}
 
-        // Capture any additional values that might exist in the token but are
-        // not part of the standard response. Vendors will sometimes pass
-        // additional user data this way.
-        $this->values = array_diff_key($options, array_flip([
-            'access_token',
-            'resource_owner_id',
-            'refresh_token',
-            'expires_in',
-            'expires',
-        ]));
-    }
+			$this->expires = $expires;
+		}
 
-    /**
-     * Check if a value is an expiration timestamp or second value.
-     *
-     * @param integer $value
-     * @return bool
-     */
-    protected function isExpirationTimestamp($value)
-    {
-        // If the given value is larger than the original OAuth 2 draft date,
-        // assume that it is meant to be a (possible expired) timestamp.
-        $oauth2InceptionDate = 1349067600; // 2012-10-01
-        return ($value > $oauth2InceptionDate);
-    }
+		// Capture any additional values that might exist in the token but are
+		// not part of the standard response. Vendors will sometimes pass
+		// additional user data this way.
+		$this->values = array_diff_key(
+			$options,
+			array_flip(
+				array(
+					'access_token',
+					'resource_owner_id',
+					'refresh_token',
+					'expires_in',
+					'expires',
+				)
+			)
+		);
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function getToken()
-    {
-        return $this->accessToken;
-    }
+	/**
+	 * Check if a value is an expiration timestamp or second value.
+	 *
+	 * @param integer $value
+	 * @return bool
+	 */
+	protected function isExpirationTimestamp( $value ) {
+		// If the given value is larger than the original OAuth 2 draft date,
+		// assume that it is meant to be a (possible expired) timestamp.
+		$oauth2InceptionDate = 1349067600; // 2012-10-01
+		return ( $value > $oauth2InceptionDate );
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function getRefreshToken()
-    {
-        return $this->refreshToken;
-    }
+	/**
+	 * @inheritdoc
+	 */
+	public function getToken() {
+		return $this->accessToken;
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function getExpires()
-    {
-        return $this->expires;
-    }
+	/**
+	 * @inheritdoc
+	 */
+	public function getRefreshToken() {
+		return $this->refreshToken;
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function getResourceOwnerId()
-    {
-        return $this->resourceOwnerId;
-    }
+	/**
+	 * @inheritdoc
+	 */
+	public function getExpires() {
+		return $this->expires;
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function hasExpired()
-    {
-        $expires = $this->getExpires();
+	/**
+	 * @inheritdoc
+	 */
+	public function getResourceOwnerId() {
+		return $this->resourceOwnerId;
+	}
 
-        if (empty($expires)) {
-            throw new RuntimeException('"expires" is not set on the token');
-        }
+	/**
+	 * @inheritdoc
+	 */
+	public function hasExpired() {
+		$expires = $this->getExpires();
 
-        return $expires < time();
-    }
+		if ( empty( $expires ) ) {
+			throw new RuntimeException( '"expires" is not set on the token' );
+		}
 
-    /**
-     * @inheritdoc
-     */
-    public function getValues()
-    {
-        return $this->values;
-    }
+		return $expires < time();
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function __toString()
-    {
-        return (string) $this->getToken();
-    }
+	/**
+	 * @inheritdoc
+	 */
+	public function getValues() {
+		return $this->values;
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function jsonSerialize()
-    {
-        $parameters = $this->values;
+	/**
+	 * @inheritdoc
+	 */
+	public function __toString() {
+		return (string) $this->getToken();
+	}
 
-        if ($this->accessToken) {
-            $parameters['access_token'] = $this->accessToken;
-        }
+	/**
+	 * @inheritdoc
+	 */
+	public function jsonSerialize() {
+		$parameters = $this->values;
 
-        if ($this->refreshToken) {
-            $parameters['refresh_token'] = $this->refreshToken;
-        }
+		if ( $this->accessToken ) {
+			$parameters['access_token'] = $this->accessToken;
+		}
 
-        if ($this->expires) {
-            $parameters['expires'] = $this->expires;
-        }
+		if ( $this->refreshToken ) {
+			$parameters['refresh_token'] = $this->refreshToken;
+		}
 
-        if ($this->resourceOwnerId) {
-            $parameters['resource_owner_id'] = $this->resourceOwnerId;
-        }
+		if ( $this->expires ) {
+			$parameters['expires'] = $this->expires;
+		}
 
-        return $parameters;
-    }
+		if ( $this->resourceOwnerId ) {
+			$parameters['resource_owner_id'] = $this->resourceOwnerId;
+		}
+
+		return $parameters;
+	}
 }

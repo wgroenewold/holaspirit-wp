@@ -15,7 +15,7 @@
  * Plugin Name: Holaspirit
  * Version:     1.0.0
  * Plugin URI:  https://ghocommunicatie.nl
- * Description: Use Holaspirit-data in Wordpress
+ * Description: Use Holaspirit-data in WordPress
  * Author:      Wouter Groenewold
  * Author URI:  https://github.com/wgroenewold
  * Text Domain: holaspirit
@@ -51,19 +51,22 @@ require HOLASPIRIT_ROOT . '/vendor/autoload.php';
 
 register_deactivation_hook( __FILE__, 'token_deactivate' );
 
+/**
+ * Deactivate the cron hook on plugin deactivation.
+ */
 function token_deactivate() {
 	$timestamp = wp_next_scheduled( 'token_cron_hook' );
 	wp_unschedule_event( $timestamp, 'token_cron_hook' );
 }
 
-include_once 'app/class-holaspirit-admin.php';
-include_once 'app/class-holaspirit-api.php';
-include_once 'app/class-holaspirit-user.php';
-include_once 'app/class-holaspirit-role.php';
-include_once 'app/class-holaspirit-circle.php';
+require_once 'app/class-holaspirit-admin.php';
+require_once 'app/class-holaspirit-api.php';
+require_once 'app/class-holaspirit-user.php';
+require_once 'app/class-holaspirit-role.php';
+require_once 'app/class-holaspirit-circle.php';
 
 ( new Holaspirit_Admin() );
 ( new Holaspirit_API() );
-( new Holaspirit_User );
-( new Holaspirit_Role );
+( new Holaspirit_User() );
+( new Holaspirit_Role() );
 ( new Holaspirit_Circle() );

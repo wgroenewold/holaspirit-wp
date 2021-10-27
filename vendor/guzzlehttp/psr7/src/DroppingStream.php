@@ -10,37 +10,35 @@ use Psr\Http\Message\StreamInterface;
  * Stream decorator that begins dropping data once the size of the underlying
  * stream becomes too full.
  */
-final class DroppingStream implements StreamInterface
-{
-    use StreamDecoratorTrait;
+final class DroppingStream implements StreamInterface {
 
-    /** @var int */
-    private $maxLength;
+	use StreamDecoratorTrait;
 
-    /**
-     * @param StreamInterface $stream    Underlying stream to decorate.
-     * @param int             $maxLength Maximum size before dropping data.
-     */
-    public function __construct(StreamInterface $stream, int $maxLength)
-    {
-        $this->stream = $stream;
-        $this->maxLength = $maxLength;
-    }
+	/** @var int */
+	private $maxLength;
 
-    public function write($string): int
-    {
-        $diff = $this->maxLength - $this->stream->getSize();
+	/**
+	 * @param StreamInterface $stream    Underlying stream to decorate.
+	 * @param int             $maxLength Maximum size before dropping data.
+	 */
+	public function __construct( StreamInterface $stream, int $maxLength ) {
+		$this->stream    = $stream;
+		$this->maxLength = $maxLength;
+	}
 
-        // Begin returning 0 when the underlying stream is too large.
-        if ($diff <= 0) {
-            return 0;
-        }
+	public function write( $string ): int {
+		$diff = $this->maxLength - $this->stream->getSize();
 
-        // Write the stream or a subset of the stream if needed.
-        if (strlen($string) < $diff) {
-            return $this->stream->write($string);
-        }
+		// Begin returning 0 when the underlying stream is too large.
+		if ( $diff <= 0 ) {
+			return 0;
+		}
 
-        return $this->stream->write(substr($string, 0, $diff));
-    }
+		// Write the stream or a subset of the stream if needed.
+		if ( strlen( $string ) < $diff ) {
+			return $this->stream->write( $string );
+		}
+
+		return $this->stream->write( substr( $string, 0, $diff ) );
+	}
 }

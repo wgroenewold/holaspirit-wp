@@ -19,24 +19,22 @@ namespace League\OAuth2\Client\Grant;
  *
  * @link http://tools.ietf.org/html/rfc6749#section-1.3.3 Resource Owner Password Credentials (RFC 6749, §1.3.3)
  */
-class Password extends AbstractGrant
-{
-    /**
-     * @inheritdoc
-     */
-    protected function getName()
-    {
-        return 'password';
-    }
+class Password extends AbstractGrant {
 
-    /**
-     * @inheritdoc
-     */
-    protected function getRequiredRequestParameters()
-    {
-        return [
-            'username',
-            'password',
-        ];
-    }
+	/**
+	 * @inheritdoc
+	 */
+	protected function getName() {
+		return 'password';
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	protected function getRequiredRequestParameters() {
+		return array(
+			'username',
+			'password',
+		);
+	}
 }

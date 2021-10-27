@@ -20,32 +20,30 @@ use League\OAuth2\Client\Tool\QueryBuilderTrait;
 /**
  * Provide options for access token
  */
-class PostAuthOptionProvider implements OptionProviderInterface
-{
-    use QueryBuilderTrait;
+class PostAuthOptionProvider implements OptionProviderInterface {
 
-    /**
-     * @inheritdoc
-     */
-    public function getAccessTokenOptions($method, array $params)
-    {
-        $options = ['headers' => ['content-type' => 'application/x-www-form-urlencoded']];
+	use QueryBuilderTrait;
 
-        if ($method === AbstractProvider::METHOD_POST) {
-            $options['body'] = $this->getAccessTokenBody($params);
-        }
+	/**
+	 * @inheritdoc
+	 */
+	public function getAccessTokenOptions( $method, array $params ) {
+		$options = array( 'headers' => array( 'content-type' => 'application/x-www-form-urlencoded' ) );
 
-        return $options;
-    }
+		if ( $method === AbstractProvider::METHOD_POST ) {
+			$options['body'] = $this->getAccessTokenBody( $params );
+		}
 
-    /**
-     * Returns the request body for requesting an access token.
-     *
-     * @param  array $params
-     * @return string
-     */
-    protected function getAccessTokenBody(array $params)
-    {
-        return $this->buildQueryString($params);
-    }
+		return $options;
+	}
+
+	/**
+	 * Returns the request body for requesting an access token.
+	 *
+	 * @param  array $params
+	 * @return string
+	 */
+	protected function getAccessTokenBody( array $params ) {
+		return $this->buildQueryString( $params );
+	}
 }

@@ -8,115 +8,113 @@ use InvalidArgumentException;
 use Psr\Http\Message\RequestInterface;
 use Psr\Http\Message\ResponseInterface;
 
-trait ProviderRedirectTrait
-{
-    /**
-     * Maximum number of times to follow provider initiated redirects
-     *
-     * @var integer
-     */
-    protected $redirectLimit = 2;
+trait ProviderRedirectTrait {
 
-    /**
-     * Retrieves a response for a given request and retrieves subsequent
-     * responses, with authorization headers, if a redirect is detected.
-     *
-     * @param  RequestInterface $request
-     * @return ResponseInterface
-     * @throws BadResponseException
-     */
-    protected function followRequestRedirects(RequestInterface $request)
-    {
-        $response = null;
-        $attempts = 0;
+	/**
+	 * Maximum number of times to follow provider initiated redirects
+	 *
+	 * @var integer
+	 */
+	protected $redirectLimit = 2;
 
-        while ($attempts < $this->redirectLimit) {
-            $attempts++;
-            $response = $this->getHttpClient()->send($request, [
-                'allow_redirects' => false
-            ]);
+	/**
+	 * Retrieves a response for a given request and retrieves subsequent
+	 * responses, with authorization headers, if a redirect is detected.
+	 *
+	 * @param  RequestInterface $request
+	 * @return ResponseInterface
+	 * @throws BadResponseException
+	 */
+	protected function followRequestRedirects( RequestInterface $request ) {
+		$response = null;
+		$attempts = 0;
 
-            if ($this->isRedirect($response)) {
-                $redirectUrl = new Uri($response->getHeader('Location')[0]);
-                $request = $request->withUri($redirectUrl);
-            } else {
-                break;
-            }
-        }
+		while ( $attempts < $this->redirectLimit ) {
+			$attempts++;
+			$response = $this->getHttpClient()->send(
+				$request,
+				array(
+					'allow_redirects' => false,
+				)
+			);
 
-        return $response;
-    }
+			if ( $this->isRedirect( $response ) ) {
+				$redirectUrl = new Uri( $response->getHeader( 'Location' )[0] );
+				$request     = $request->withUri( $redirectUrl );
+			} else {
+				break;
+			}
+		}
 
-    /**
-     * Returns the HTTP client instance.
-     *
-     * @return GuzzleHttp\ClientInterface
-     */
-    abstract public function getHttpClient();
+		return $response;
+	}
 
-    /**
-     * Retrieves current redirect limit.
-     *
-     * @return integer
-     */
-    public function getRedirectLimit()
-    {
-        return $this->redirectLimit;
-    }
+	/**
+	 * Returns the HTTP client instance.
+	 *
+	 * @return GuzzleHttp\ClientInterface
+	 */
+	abstract public function getHttpClient();
 
-    /**
-     * Determines if a given response is a redirect.
-     *
-     * @param  ResponseInterface  $response
-     *
-     * @return boolean
-     */
-    protected function isRedirect(ResponseInterface $response)
-    {
-        $statusCode = $response->getStatusCode();
+	/**
+	 * Retrieves current redirect limit.
+	 *
+	 * @return integer
+	 */
+	public function getRedirectLimit() {
+		return $this->redirectLimit;
+	}
 
-        return $statusCode > 300 && $statusCode < 400 && $response->hasHeader('Location');
-    }
+	/**
+	 * Determines if a given response is a redirect.
+	 *
+	 * @param  ResponseInterface $response
+	 *
+	 * @return boolean
+	 */
+	protected function isRedirect( ResponseInterface $response ) {
+		$statusCode = $response->getStatusCode();
 
-    /**
-     * Sends a request instance and returns a response instance.
-     *
-     * WARNING: This method does not attempt to catch exceptions caused by HTTP
-     * errors! It is recommended to wrap this method in a try/catch block.
-     *
-     * @param  RequestInterface $request
-     * @return ResponseInterface
-     */
-    public function getResponse(RequestInterface $request)
-    {
-        try {
-            $response = $this->followRequestRedirects($request);
-        } catch (BadResponseException $e) {
-            $response = $e->getResponse();
-        }
+		return $statusCode > 300 && $statusCode < 400 && $response->hasHeader( 'Location' );
+	}
 
-        return $response;
-    }
+	/**
+	 * Sends a request instance and returns a response instance.
+	 *
+	 * WARNING: This method does not attempt to catch exceptions caused by HTTP
+	 * errors! It is recommended to wrap this method in a try/catch block.
+	 *
+	 * @param  RequestInterface $request
+	 * @return ResponseInterface
+	 */
+	public function getResponse( RequestInterface $request ) {
+		try {
+			$response = $this->followRequestRedirects( $request );
+		} catch ( BadResponseException $e ) {
+			$response = $e->getResponse();
+		}
 
-    /**
-     * Updates the redirect limit.
-     *
-     * @param integer $limit
-     * @return League\OAuth2\Client\Provider\AbstractProvider
-     * @throws InvalidArgumentException
-     */
-    public function setRedirectLimit($limit)
-    {
-        if (!is_int($limit)) {
-            throw new InvalidArgumentException('redirectLimit must be an integer.');
-        }
+		return $response;
+	}
 
-        if ($limit < 1) {
-            throw new InvalidArgumentException('redirectLimit must be greater than or equal to one.');
-        }
+	/**
+	 * Updates the redirect limit.
+	 *
+	 * @param integer $limit
+	 * @return League\OAuth2\Client\Provider\AbstractProvider
+	 * @throws InvalidArgumentException
+	 */
+	public function setRedirectLimit( $limit ) {
+		if ( ! is_int( $limit ) ) {
+			throw new InvalidArgumentException( 'redirectLimit must be an integer.' );
+		}
 
-        $this->redirectLimit = $limit;
+		if ( $limit < 1 ) {
+			throw new InvalidArgumentException( 'redirectLimit must be greater than or equal to one.' );
+		}
 
-        return $this;
-    }
+		$this->redirectLimit = $limit;
+
+		return $this;
+	}
 }

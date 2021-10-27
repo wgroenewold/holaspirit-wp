@@ -17,45 +17,42 @@ namespace League\OAuth2\Client\Provider;
 /**
  * Represents a generic resource owner for use with the GenericProvider.
  */
-class GenericResourceOwner implements ResourceOwnerInterface
-{
-    /**
-     * @var array
-     */
-    protected $response;
+class GenericResourceOwner implements ResourceOwnerInterface {
 
-    /**
-     * @var string
-     */
-    protected $resourceOwnerId;
+	/**
+	 * @var array
+	 */
+	protected $response;
 
-    /**
-     * @param array $response
-     * @param string $resourceOwnerId
-     */
-    public function __construct(array $response, $resourceOwnerId)
-    {
-        $this->response = $response;
-        $this->resourceOwnerId = $resourceOwnerId;
-    }
+	/**
+	 * @var string
+	 */
+	protected $resourceOwnerId;
 
-    /**
-     * Returns the identifier of the authorized resource owner.
-     *
-     * @return mixed
-     */
-    public function getId()
-    {
-        return $this->response[$this->resourceOwnerId];
-    }
+	/**
+	 * @param array  $response
+	 * @param string $resourceOwnerId
+	 */
+	public function __construct( array $response, $resourceOwnerId ) {
+		$this->response        = $response;
+		$this->resourceOwnerId = $resourceOwnerId;
+	}
 
-    /**
-     * Returns the raw resource owner response.
-     *
-     * @return array
-     */
-    public function toArray()
-    {
-        return $this->response;
-    }
+	/**
+	 * Returns the identifier of the authorized resource owner.
+	 *
+	 * @return mixed
+	 */
+	public function getId() {
+		return $this->response[ $this->resourceOwnerId ];
+	}
+
+	/**
+	 * Returns the raw resource owner response.
+	 *
+	 * @return array
+	 */
+	public function toArray() {
+		return $this->response;
+	}
 }

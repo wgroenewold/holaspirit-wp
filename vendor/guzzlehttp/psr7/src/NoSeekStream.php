@@ -9,17 +9,15 @@ use Psr\Http\Message\StreamInterface;
 /**
  * Stream decorator that prevents a stream from being seeked.
  */
-final class NoSeekStream implements StreamInterface
-{
-    use StreamDecoratorTrait;
+final class NoSeekStream implements StreamInterface {
 
-    public function seek($offset, $whence = SEEK_SET): void
-    {
-        throw new \RuntimeException('Cannot seek a NoSeekStream');
-    }
+	use StreamDecoratorTrait;
 
-    public function isSeekable(): bool
-    {
-        return false;
-    }
+	public function seek( $offset, $whence = SEEK_SET ): void {
+		throw new \RuntimeException( 'Cannot seek a NoSeekStream' );
+	}
+
+	public function isSeekable(): bool {
+		return false;
+	}
 }

@@ -18,25 +18,25 @@ use InvalidArgumentException;
 
 /**
  * Add http basic auth into access token request options
+ *
  * @link https://tools.ietf.org/html/rfc6749#section-2.3.1
  */
-class HttpBasicAuthOptionProvider extends PostAuthOptionProvider
-{
-    /**
-     * @inheritdoc
-     */
-    public function getAccessTokenOptions($method, array $params)
-    {
-        if (empty($params['client_id']) || empty($params['client_secret'])) {
-            throw new InvalidArgumentException('clientId and clientSecret are required for http basic auth');
-        }
+class HttpBasicAuthOptionProvider extends PostAuthOptionProvider {
 
-        $encodedCredentials = base64_encode(sprintf('%s:%s', $params['client_id'], $params['client_secret']));
-        unset($params['client_id'], $params['client_secret']);
+	/**
+	 * @inheritdoc
+	 */
+	public function getAccessTokenOptions( $method, array $params ) {
+		if ( empty( $params['client_id'] ) || empty( $params['client_secret'] ) ) {
+			throw new InvalidArgumentException( 'clientId and clientSecret are required for http basic auth' );
+		}
 
-        $options = parent::getAccessTokenOptions($method, $params);
-        $options['headers']['Authorization'] = 'Basic ' . $encodedCredentials;
+		$encodedCredentials = base64_encode( sprintf( '%s:%s', $params['client_id'], $params['client_secret'] ) );
+		unset( $params['client_id'], $params['client_secret'] );
 
-        return $options;
-    }
+		$options                             = parent::getAccessTokenOptions( $method, $params );
+		$options['headers']['Authorization'] = 'Basic ' . $encodedCredentials;
+
+		return $options;
+	}
 }

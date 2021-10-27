@@ -28,53 +28,51 @@ use League\OAuth2\Client\Tool\RequiredParameterTrait;
  *
  * @link http://tools.ietf.org/html/rfc6749#section-1.3 Authorization Grant (RFC 6749, §1.3)
  */
-abstract class AbstractGrant
-{
-    use RequiredParameterTrait;
+abstract class AbstractGrant {
 
-    /**
-     * Returns the name of this grant, eg. 'grant_name', which is used as the
-     * grant type when encoding URL query parameters.
-     *
-     * @return string
-     */
-    abstract protected function getName();
+	use RequiredParameterTrait;
 
-    /**
-     * Returns a list of all required request parameters.
-     *
-     * @return array
-     */
-    abstract protected function getRequiredRequestParameters();
+	/**
+	 * Returns the name of this grant, eg. 'grant_name', which is used as the
+	 * grant type when encoding URL query parameters.
+	 *
+	 * @return string
+	 */
+	abstract protected function getName();
 
-    /**
-     * Returns this grant's name as its string representation. This allows for
-     * string interpolation when building URL query parameters.
-     *
-     * @return string
-     */
-    public function __toString()
-    {
-        return $this->getName();
-    }
+	/**
+	 * Returns a list of all required request parameters.
+	 *
+	 * @return array
+	 */
+	abstract protected function getRequiredRequestParameters();
 
-    /**
-     * Prepares an access token request's parameters by checking that all
-     * required parameters are set, then merging with any given defaults.
-     *
-     * @param  array $defaults
-     * @param  array $options
-     * @return array
-     */
-    public function prepareRequestParameters(array $defaults, array $options)
-    {
-        $defaults['grant_type'] = $this->getName();
+	/**
+	 * Returns this grant's name as its string representation. This allows for
+	 * string interpolation when building URL query parameters.
+	 *
+	 * @return string
+	 */
+	public function __toString() {
+		return $this->getName();
+	}
 
-        $required = $this->getRequiredRequestParameters();
-        $provided = array_merge($defaults, $options);
+	/**
+	 * Prepares an access token request's parameters by checking that all
+	 * required parameters are set, then merging with any given defaults.
+	 *
+	 * @param  array $defaults
+	 * @param  array $options
+	 * @return array
+	 */
+	public function prepareRequestParameters( array $defaults, array $options ) {
+		$defaults['grant_type'] = $this->getName();
 
-        $this->checkRequiredParameters($required, $provided);
+		$required = $this->getRequiredRequestParameters();
+		$provided = array_merge( $defaults, $options );
 
-        return $provided;
-    }
+		$this->checkRequiredParameters( $required, $provided );
+
+		return $provided;
+	}
 }

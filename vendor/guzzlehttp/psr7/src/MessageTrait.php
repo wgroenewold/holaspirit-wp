@@ -10,226 +10,218 @@ use Psr\Http\Message\StreamInterface;
 /**
  * Trait implementing functionality common to requests and responses.
  */
-trait MessageTrait
-{
-    /** @var array<string, string[]> Map of all registered headers, as original name => array of values */
-    private $headers = [];
+trait MessageTrait {
 
-    /** @var array<string, string> Map of lowercase header name => original name at registration */
-    private $headerNames  = [];
+	/** @var array<string, string[]> Map of all registered headers, as original name => array of values */
+	private $headers = array();
 
-    /** @var string */
-    private $protocol = '1.1';
+	/** @var array<string, string> Map of lowercase header name => original name at registration */
+	private $headerNames = array();
 
-    /** @var StreamInterface|null */
-    private $stream;
+	/** @var string */
+	private $protocol = '1.1';
 
-    public function getProtocolVersion(): string
-    {
-        return $this->protocol;
-    }
+	/** @var StreamInterface|null */
+	private $stream;
 
-    public function withProtocolVersion($version): MessageInterface
-    {
-        if ($this->protocol === $version) {
-            return $this;
-        }
+	public function getProtocolVersion(): string {
+		return $this->protocol;
+	}
 
-        $new = clone $this;
-        $new->protocol = $version;
-        return $new;
-    }
+	public function withProtocolVersion( $version ): MessageInterface {
+		if ( $this->protocol === $version ) {
+			return $this;
+		}
 
-    public function getHeaders(): array
-    {
-        return $this->headers;
-    }
+		$new           = clone $this;
+		$new->protocol = $version;
+		return $new;
+	}
 
-    public function hasHeader($header): bool
-    {
-        return isset($this->headerNames[strtolower($header)]);
-    }
+	public function getHeaders(): array {
+		return $this->headers;
+	}
 
-    public function getHeader($header): array
-    {
-        $header = strtolower($header);
+	public function hasHeader( $header ): bool {
+		return isset( $this->headerNames[ strtolower( $header ) ] );
+	}
 
-        if (!isset($this->headerNames[$header])) {
-            return [];
-        }
+	public function getHeader( $header ): array {
+		$header = strtolower( $header );
 
-        $header = $this->headerNames[$header];
+		if ( ! isset( $this->headerNames[ $header ] ) ) {
+			return array();
+		}
 
-        return $this->headers[$header];
-    }
+		$header = $this->headerNames[ $header ];
 
-    public function getHeaderLine($header): string
-    {
-        return implode(', ', $this->getHeader($header));
-    }
+		return $this->headers[ $header ];
+	}
 
-    public function withHeader($header, $value): MessageInterface
-    {
-        $this->assertHeader($header);
-        $value = $this->normalizeHeaderValue($value);
-        $normalized = strtolower($header);
+	public function getHeaderLine( $header ): string {
+		return implode( ', ', $this->getHeader( $header ) );
+	}
 
-        $new = clone $this;
-        if (isset($new->headerNames[$normalized])) {
-            unset($new->headers[$new->headerNames[$normalized]]);
-        }
-        $new->headerNames[$normalized] = $header;
-        $new->headers[$header] = $value;
+	public function withHeader( $header, $value ): MessageInterface {
+		$this->assertHeader( $header );
+		$value      = $this->normalizeHeaderValue( $value );
+		$normalized = strtolower( $header );
 
-        return $new;
-    }
+		$new = clone $this;
+		if ( isset( $new->headerNames[ $normalized ] ) ) {
+			unset( $new->headers[ $new->headerNames[ $normalized ] ] );
+		}
+		$new->headerNames[ $normalized ] = $header;
+		$new->headers[ $header ]         = $value;
 
-    public function withAddedHeader($header, $value): MessageInterface
-    {
-        $this->assertHeader($header);
-        $value = $this->normalizeHeaderValue($value);
-        $normalized = strtolower($header);
+		return $new;
+	}
 
-        $new = clone $this;
-        if (isset($new->headerNames[$normalized])) {
-            $header = $this->headerNames[$normalized];
-            $new->headers[$header] = array_merge($this->headers[$header], $value);
-        } else {
-            $new->headerNames[$normalized] = $header;
-            $new->headers[$header] = $value;
-        }
+	public function withAddedHeader( $header, $value ): MessageInterface {
+		$this->assertHeader( $header );
+		$value      = $this->normalizeHeaderValue( $value );
+		$normalized = strtolower( $header );
 
-        return $new;
-    }
+		$new = clone $this;
+		if ( isset( $new->headerNames[ $normalized ] ) ) {
+			$header                  = $this->headerNames[ $normalized ];
+			$new->headers[ $header ] = array_merge( $this->headers[ $header ], $value );
+		} else {
+			$new->headerNames[ $normalized ] = $header;
+			$new->headers[ $header ]         = $value;
+		}
 
-    public function withoutHeader($header): MessageInterface
-    {
-        $normalized = strtolower($header);
+		return $new;
+	}
 
-        if (!isset($this->headerNames[$normalized])) {
-            return $this;
-        }
+	public function withoutHeader( $header ): MessageInterface {
+		$normalized = strtolower( $header );
 
-        $header = $this->headerNames[$normalized];
+		if ( ! isset( $this->headerNames[ $normalized ] ) ) {
+			return $this;
+		}
 
-        $new = clone $this;
-        unset($new->headers[$header], $new->headerNames[$normalized]);
+		$header = $this->headerNames[ $normalized ];
 
-        return $new;
-    }
+		$new = clone $this;
+		unset( $new->headers[ $header ], $new->headerNames[ $normalized ] );
 
-    public function getBody(): StreamInterface
-    {
-        if (!$this->stream) {
-            $this->stream = Utils::streamFor('');
-        }
+		return $new;
+	}
 
-        return $this->stream;
-    }
+	public function getBody(): StreamInterface {
+		if ( ! $this->stream ) {
+			$this->stream = Utils::streamFor( '' );
+		}
 
-    public function withBody(StreamInterface $body): MessageInterface
-    {
-        if ($body === $this->stream) {
-            return $this;
-        }
+		return $this->stream;
+	}
 
-        $new = clone $this;
-        $new->stream = $body;
-        return $new;
-    }
+	public function withBody( StreamInterface $body ): MessageInterface {
+		if ( $body === $this->stream ) {
+			return $this;
+		}
 
-    /**
-     * @param array<string|int, string|string[]> $headers
-     */
-    private function setHeaders(array $headers): void
-    {
-        $this->headerNames = $this->headers = [];
-        foreach ($headers as $header => $value) {
-            if (is_int($header)) {
-                // Numeric array keys are converted to int by PHP but having a header name '123' is not forbidden by the spec
-                // and also allowed in withHeader(). So we need to cast it to string again for the following assertion to pass.
-                $header = (string) $header;
-            }
-            $this->assertHeader($header);
-            $value = $this->normalizeHeaderValue($value);
-            $normalized = strtolower($header);
-            if (isset($this->headerNames[$normalized])) {
-                $header = $this->headerNames[$normalized];
-                $this->headers[$header] = array_merge($this->headers[$header], $value);
-            } else {
-                $this->headerNames[$normalized] = $header;
-                $this->headers[$header] = $value;
-            }
-        }
-    }
+		$new         = clone $this;
+		$new->stream = $body;
+		return $new;
+	}
 
-    /**
-     * @param mixed $value
-     *
-     * @return string[]
-     */
-    private function normalizeHeaderValue($value): array
-    {
-        if (!is_array($value)) {
-            return $this->trimHeaderValues([$value]);
-        }
+	/**
+	 * @param array<string|int, string|string[]> $headers
+	 */
+	private function setHeaders( array $headers ): void {
+		$this->headerNames = $this->headers = array();
+		foreach ( $headers as $header => $value ) {
+			if ( is_int( $header ) ) {
+				// Numeric array keys are converted to int by PHP but having a header name '123' is not forbidden by the spec
+				// and also allowed in withHeader(). So we need to cast it to string again for the following assertion to pass.
+				$header = (string) $header;
+			}
+			$this->assertHeader( $header );
+			$value      = $this->normalizeHeaderValue( $value );
+			$normalized = strtolower( $header );
+			if ( isset( $this->headerNames[ $normalized ] ) ) {
+				$header                   = $this->headerNames[ $normalized ];
+				$this->headers[ $header ] = array_merge( $this->headers[ $header ], $value );
+			} else {
+				$this->headerNames[ $normalized ] = $header;
+				$this->headers[ $header ]         = $value;
+			}
+		}
+	}
 
-        if (count($value) === 0) {
-            throw new \InvalidArgumentException('Header value can not be an empty array.');
-        }
+	/**
+	 * @param mixed $value
+	 *
+	 * @return string[]
+	 */
+	private function normalizeHeaderValue( $value ): array {
+		if ( ! is_array( $value ) ) {
+			return $this->trimHeaderValues( array( $value ) );
+		}
 
-        return $this->trimHeaderValues($value);
-    }
+		if ( count( $value ) === 0 ) {
+			throw new \InvalidArgumentException( 'Header value can not be an empty array.' );
+		}
 
-    /**
-     * Trims whitespace from the header values.
-     *
-     * Spaces and tabs ought to be excluded by parsers when extracting the field value from a header field.
-     *
-     * header-field = field-name ":" OWS field-value OWS
-     * OWS          = *( SP / HTAB )
-     *
-     * @param mixed[] $values Header values
-     *
-     * @return string[] Trimmed header values
-     *
-     * @see https://tools.ietf.org/html/rfc7230#section-3.2.4
-     */
-    private function trimHeaderValues(array $values): array
-    {
-        return array_map(function ($value) {
-            if (!is_scalar($value) && null !== $value) {
-                throw new \InvalidArgumentException(sprintf(
-                    'Header value must be scalar or null but %s provided.',
-                    is_object($value) ? get_class($value) : gettype($value)
-                ));
-            }
+		return $this->trimHeaderValues( $value );
+	}
 
-            return trim((string) $value, " \t");
-        }, array_values($values));
-    }
+	/**
+	 * Trims whitespace from the header values.
+	 *
+	 * Spaces and tabs ought to be excluded by parsers when extracting the field value from a header field.
+	 *
+	 * header-field = field-name ":" OWS field-value OWS
+	 * OWS          = *( SP / HTAB )
+	 *
+	 * @param mixed[] $values Header values
+	 *
+	 * @return string[] Trimmed header values
+	 *
+	 * @see https://tools.ietf.org/html/rfc7230#section-3.2.4
+	 */
+	private function trimHeaderValues( array $values ): array {
+		return array_map(
+			function ( $value ) {
+				if ( ! is_scalar( $value ) && null !== $value ) {
+					throw new \InvalidArgumentException(
+						sprintf(
+							'Header value must be scalar or null but %s provided.',
+							is_object( $value ) ? get_class( $value ) : gettype( $value )
+						)
+					);
+				}
 
-    /**
-     * @see https://tools.ietf.org/html/rfc7230#section-3.2
-     *
-     * @param mixed $header
-     */
-    private function assertHeader($header): void
-    {
-        if (!is_string($header)) {
-            throw new \InvalidArgumentException(sprintf(
-                'Header name must be a string but %s provided.',
-                is_object($header) ? get_class($header) : gettype($header)
-            ));
-        }
+				return trim( (string) $value, " \t" );
+			},
+			array_values( $values )
+		);
+	}
 
-        if (! preg_match('/^[a-zA-Z0-9\'`#$%&*+.^_|~!-]+$/', $header)) {
-            throw new \InvalidArgumentException(
-                sprintf(
-                    '"%s" is not valid header name',
-                    $header
-                )
-            );
-        }
-    }
+	/**
+	 * @see https://tools.ietf.org/html/rfc7230#section-3.2
+	 *
+	 * @param mixed $header
+	 */
+	private function assertHeader( $header ): void {
+		if ( ! is_string( $header ) ) {
+			throw new \InvalidArgumentException(
+				sprintf(
+					'Header name must be a string but %s provided.',
+					is_object( $header ) ? get_class( $header ) : gettype( $header )
+				)
+			);
+		}
+
+		if ( ! preg_match( '/^[a-zA-Z0-9\'`#$%&*+.^_|~!-]+$/', $header ) ) {
+			throw new \InvalidArgumentException(
+				sprintf(
+					'"%s" is not valid header name',
+					$header
+				)
+			);
+		}
+	}
 }

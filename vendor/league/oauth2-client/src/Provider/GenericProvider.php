@@ -24,210 +24,200 @@ use Psr\Http\Message\ResponseInterface;
  * Represents a generic service provider that may be used to interact with any
  * OAuth 2.0 service provider, using Bearer token authentication.
  */
-class GenericProvider extends AbstractProvider
-{
-    use BearerAuthorizationTrait;
+class GenericProvider extends AbstractProvider {
 
-    /**
-     * @var string
-     */
-    private $urlAuthorize;
+	use BearerAuthorizationTrait;
 
-    /**
-     * @var string
-     */
-    private $urlAccessToken;
+	/**
+	 * @var string
+	 */
+	private $urlAuthorize;
 
-    /**
-     * @var string
-     */
-    private $urlResourceOwnerDetails;
+	/**
+	 * @var string
+	 */
+	private $urlAccessToken;
 
-    /**
-     * @var string
-     */
-    private $accessTokenMethod;
+	/**
+	 * @var string
+	 */
+	private $urlResourceOwnerDetails;
 
-    /**
-     * @var string
-     */
-    private $accessTokenResourceOwnerId;
+	/**
+	 * @var string
+	 */
+	private $accessTokenMethod;
 
-    /**
-     * @var array|null
-     */
-    private $scopes = null;
+	/**
+	 * @var string
+	 */
+	private $accessTokenResourceOwnerId;
 
-    /**
-     * @var string
-     */
-    private $scopeSeparator;
+	/**
+	 * @var array|null
+	 */
+	private $scopes = null;
 
-    /**
-     * @var string
-     */
-    private $responseError = 'error';
+	/**
+	 * @var string
+	 */
+	private $scopeSeparator;
 
-    /**
-     * @var string
-     */
-    private $responseCode;
+	/**
+	 * @var string
+	 */
+	private $responseError = 'error';
 
-    /**
-     * @var string
-     */
-    private $responseResourceOwnerId = 'id';
+	/**
+	 * @var string
+	 */
+	private $responseCode;
 
-    /**
-     * @param array $options
-     * @param array $collaborators
-     */
-    public function __construct(array $options = [], array $collaborators = [])
-    {
-        $this->assertRequiredOptions($options);
+	/**
+	 * @var string
+	 */
+	private $responseResourceOwnerId = 'id';
 
-        $possible   = $this->getConfigurableOptions();
-        $configured = array_intersect_key($options, array_flip($possible));
+	/**
+	 * @param array $options
+	 * @param array $collaborators
+	 */
+	public function __construct( array $options = array(), array $collaborators = array() ) {
+		$this->assertRequiredOptions( $options );
 
-        foreach ($configured as $key => $value) {
-            $this->$key = $value;
-        }
+		$possible   = $this->getConfigurableOptions();
+		$configured = array_intersect_key( $options, array_flip( $possible ) );
 
-        // Remove all options that are only used locally
-        $options = array_diff_key($options, $configured);
+		foreach ( $configured as $key => $value ) {
+			$this->$key = $value;
+		}
 
-        parent::__construct($options, $collaborators);
-    }
+		// Remove all options that are only used locally
+		$options = array_diff_key( $options, $configured );
 
-    /**
-     * Returns all options that can be configured.
-     *
-     * @return array
-     */
-    protected function getConfigurableOptions()
-    {
-        return array_merge($this->getRequiredOptions(), [
-            'accessTokenMethod',
-            'accessTokenResourceOwnerId',
-            'scopeSeparator',
-            'responseError',
-            'responseCode',
-            'responseResourceOwnerId',
-            'scopes',
-        ]);
-    }
+		parent::__construct( $options, $collaborators );
+	}
 
-    /**
-     * Returns all options that are required.
-     *
-     * @return array
-     */
-    protected function getRequiredOptions()
-    {
-        return [
-            'urlAuthorize',
-            'urlAccessToken',
-            'urlResourceOwnerDetails',
-        ];
-    }
+	/**
+	 * Returns all options that can be configured.
+	 *
+	 * @return array
+	 */
+	protected function getConfigurableOptions() {
+		return array_merge(
+			$this->getRequiredOptions(),
+			array(
+				'accessTokenMethod',
+				'accessTokenResourceOwnerId',
+				'scopeSeparator',
+				'responseError',
+				'responseCode',
+				'responseResourceOwnerId',
+				'scopes',
+			)
+		);
+	}
 
-    /**
-     * Verifies that all required options have been passed.
-     *
-     * @param  array $options
-     * @return void
-     * @throws InvalidArgumentException
-     */
-    private function assertRequiredOptions(array $options)
-    {
-        $missing = array_diff_key(array_flip($this->getRequiredOptions()), $options);
+	/**
+	 * Returns all options that are required.
+	 *
+	 * @return array
+	 */
+	protected function getRequiredOptions() {
+		return array(
+			'urlAuthorize',
+			'urlAccessToken',
+			'urlResourceOwnerDetails',
+		);
+	}
 
-        if (!empty($missing)) {
-            throw new InvalidArgumentException(
-                'Required options not defined: ' . implode(', ', array_keys($missing))
-            );
-        }
-    }
+	/**
+	 * Verifies that all required options have been passed.
+	 *
+	 * @param  array $options
+	 * @return void
+	 * @throws InvalidArgumentException
+	 */
+	private function assertRequiredOptions( array $options ) {
+		$missing = array_diff_key( array_flip( $this->getRequiredOptions() ), $options );
 
-    /**
-     * @inheritdoc
-     */
-    public function getBaseAuthorizationUrl()
-    {
-        return $this->urlAuthorize;
-    }
+		if ( ! empty( $missing ) ) {
+			throw new InvalidArgumentException(
+				'Required options not defined: ' . implode( ', ', array_keys( $missing ) )
+			);
+		}
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function getBaseAccessTokenUrl(array $params)
-    {
-        return $this->urlAccessToken;
-    }
+	/**
+	 * @inheritdoc
+	 */
+	public function getBaseAuthorizationUrl() {
+		return $this->urlAuthorize;
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function getResourceOwnerDetailsUrl(AccessToken $token)
-    {
-        return $this->urlResourceOwnerDetails;
-    }
+	/**
+	 * @inheritdoc
+	 */
+	public function getBaseAccessTokenUrl( array $params ) {
+		return $this->urlAccessToken;
+	}
 
-    /**
-     * @inheritdoc
-     */
-    public function getDefaultScopes()
-    {
-        return $this->scopes;
-    }
+	/**
+	 * @inheritdoc
+	 */
+	public function getResourceOwnerDetailsUrl( AccessToken $token ) {
+		return $this->urlResourceOwnerDetails;
+	}
 
-    /**
-     * @inheritdoc
-     */
-    protected function getAccessTokenMethod()
-    {
-        return $this->accessTokenMethod ?: parent::getAccessTokenMethod();
-    }
+	/**
+	 * @inheritdoc
+	 */
+	public function getDefaultScopes() {
+		return $this->scopes;
+	}
 
-    /**
-     * @inheritdoc
-     */
-    protected function getAccessTokenResourceOwnerId()
-    {
-        return $this->accessTokenResourceOwnerId ?: parent::getAccessTokenResourceOwnerId();
-    }
+	/**
+	 * @inheritdoc
+	 */
+	protected function getAccessTokenMethod() {
+		return $this->accessTokenMethod ?: parent::getAccessTokenMethod();
+	}
 
-    /**
-     * @inheritdoc
-     */
-    protected function getScopeSeparator()
-    {
-        return $this->scopeSeparator ?: parent::getScopeSeparator();
-    }
+	/**
+	 * @inheritdoc
+	 */
+	protected function getAccessTokenResourceOwnerId() {
+		return $this->accessTokenResourceOwnerId ?: parent::getAccessTokenResourceOwnerId();
+	}
 
-    /**
-     * @inheritdoc
-     */
-    protected function checkResponse(ResponseInterface $response, $data)
-    {
-        if (!empty($data[$this->responseError])) {
-            $error = $data[$this->responseError];
-            if (!is_string($error)) {
-                $error = var_export($error, true);
-            }
-            $code  = $this->responseCode && !empty($data[$this->responseCode])? $data[$this->responseCode] : 0;
-            if (!is_int($code)) {
-                $code = intval($code);
-            }
-            throw new IdentityProviderException($error, $code, $data);
-        }
-    }
+	/**
+	 * @inheritdoc
+	 */
+	protected function getScopeSeparator() {
+		return $this->scopeSeparator ?: parent::getScopeSeparator();
+	}
 
-    /**
-     * @inheritdoc
-     */
-    protected function createResourceOwner(array $response, AccessToken $token)
-    {
-        return new GenericResourceOwner($response, $this->responseResourceOwnerId);
-    }
+	/**
+	 * @inheritdoc
+	 */
+	protected function checkResponse( ResponseInterface $response, $data ) {
+		if ( ! empty( $data[ $this->responseError ] ) ) {
+			$error = $data[ $this->responseError ];
+			if ( ! is_string( $error ) ) {
+				$error = var_export( $error, true );
+			}
+			$code = $this->responseCode && ! empty( $data[ $this->responseCode ] ) ? $data[ $this->responseCode ] : 0;
+			if ( ! is_int( $code ) ) {
+				$code = intval( $code );
+			}
+			throw new IdentityProviderException( $error, $code, $data );
+		}
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	protected function createResourceOwner( array $response, AccessToken $token ) {
+		return new GenericResourceOwner( $response, $this->responseResourceOwnerId );
+	}
 }

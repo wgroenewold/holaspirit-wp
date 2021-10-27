@@ -19,23 +19,21 @@ namespace League\OAuth2\Client\Grant;
  *
  * @link http://tools.ietf.org/html/rfc6749#section-6 Refreshing an Access Token (RFC 6749, §6)
  */
-class RefreshToken extends AbstractGrant
-{
-    /**
-     * @inheritdoc
-     */
-    protected function getName()
-    {
-        return 'refresh_token';
-    }
+class RefreshToken extends AbstractGrant {
 
-    /**
-     * @inheritdoc
-     */
-    protected function getRequiredRequestParameters()
-    {
-        return [
-            'refresh_token',
-        ];
-    }
+	/**
+	 * @inheritdoc
+	 */
+	protected function getName() {
+		return 'refresh_token';
+	}
+
+	/**
+	 * @inheritdoc
+	 */
+	protected function getRequiredRequestParameters() {
+		return array(
+			'refresh_token',
+		);
+	}
 }

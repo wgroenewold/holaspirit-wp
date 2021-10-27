@@ -21,9 +21,8 @@ namespace GuzzleHttp\Promise;
  *
  * @deprecated queue will be removed in guzzlehttp/promises:2.0. Use Utils::queue instead.
  */
-function queue(TaskQueueInterface $assign = null)
-{
-    return Utils::queue($assign);
+function queue( TaskQueueInterface $assign = null ) {
+	return Utils::queue( $assign );
 }
 
 /**
@@ -36,9 +35,8 @@ function queue(TaskQueueInterface $assign = null)
  *
  * @deprecated task will be removed in guzzlehttp/promises:2.0. Use Utils::task instead.
  */
-function task(callable $task)
-{
-    return Utils::task($task);
+function task( callable $task ) {
+	return Utils::task( $task );
 }
 
 /**
@@ -50,9 +48,8 @@ function task(callable $task)
  *
  * @deprecated promise_for will be removed in guzzlehttp/promises:2.0. Use Create::promiseFor instead.
  */
-function promise_for($value)
-{
-    return Create::promiseFor($value);
+function promise_for( $value ) {
+	return Create::promiseFor( $value );
 }
 
 /**
@@ -65,9 +62,8 @@ function promise_for($value)
  *
  * @deprecated rejection_for will be removed in guzzlehttp/promises:2.0. Use Create::rejectionFor instead.
  */
-function rejection_for($reason)
-{
-    return Create::rejectionFor($reason);
+function rejection_for( $reason ) {
+	return Create::rejectionFor( $reason );
 }
 
 /**
@@ -79,9 +75,8 @@ function rejection_for($reason)
  *
  * @deprecated exception_for will be removed in guzzlehttp/promises:2.0. Use Create::exceptionFor instead.
  */
-function exception_for($reason)
-{
-    return Create::exceptionFor($reason);
+function exception_for( $reason ) {
+	return Create::exceptionFor( $reason );
 }
 
 /**
@@ -93,9 +88,8 @@ function exception_for($reason)
  *
  * @deprecated iter_for will be removed in guzzlehttp/promises:2.0. Use Create::iterFor instead.
  */
-function iter_for($value)
-{
-    return Create::iterFor($value);
+function iter_for( $value ) {
+	return Create::iterFor( $value );
 }
 
 /**
@@ -114,9 +108,8 @@ function iter_for($value)
  *
  * @deprecated inspect will be removed in guzzlehttp/promises:2.0. Use Utils::inspect instead.
  */
-function inspect(PromiseInterface $promise)
-{
-    return Utils::inspect($promise);
+function inspect( PromiseInterface $promise ) {
+	return Utils::inspect( $promise );
 }
 
 /**
@@ -133,9 +126,8 @@ function inspect(PromiseInterface $promise)
  *
  * @deprecated inspect will be removed in guzzlehttp/promises:2.0. Use Utils::inspectAll instead.
  */
-function inspect_all($promises)
-{
-    return Utils::inspectAll($promises);
+function inspect_all( $promises ) {
+	return Utils::inspectAll( $promises );
 }
 
 /**
@@ -154,9 +146,8 @@ function inspect_all($promises)
  *
  * @deprecated unwrap will be removed in guzzlehttp/promises:2.0. Use Utils::unwrap instead.
  */
-function unwrap($promises)
-{
-    return Utils::unwrap($promises);
+function unwrap( $promises ) {
+	return Utils::unwrap( $promises );
 }
 
 /**
@@ -174,9 +165,8 @@ function unwrap($promises)
  *
  * @deprecated all will be removed in guzzlehttp/promises:2.0. Use Utils::all instead.
  */
-function all($promises, $recursive = false)
-{
-    return Utils::all($promises, $recursive);
+function all( $promises, $recursive = false ) {
+	return Utils::all( $promises, $recursive );
 }
 
 /**
@@ -197,9 +187,8 @@ function all($promises, $recursive = false)
  *
  * @deprecated some will be removed in guzzlehttp/promises:2.0. Use Utils::some instead.
  */
-function some($count, $promises)
-{
-    return Utils::some($count, $promises);
+function some( $count, $promises ) {
+	return Utils::some( $count, $promises );
 }
 
 /**
@@ -212,9 +201,8 @@ function some($count, $promises)
  *
  * @deprecated any will be removed in guzzlehttp/promises:2.0. Use Utils::any instead.
  */
-function any($promises)
-{
-    return Utils::any($promises);
+function any( $promises ) {
+	return Utils::any( $promises );
 }
 
 /**
@@ -231,9 +219,8 @@ function any($promises)
  *
  * @deprecated settle will be removed in guzzlehttp/promises:2.0. Use Utils::settle instead.
  */
-function settle($promises)
-{
-    return Utils::settle($promises);
+function settle( $promises ) {
+	return Utils::settle( $promises );
 }
 
 /**
@@ -258,11 +245,11 @@ function settle($promises)
  * @deprecated each will be removed in guzzlehttp/promises:2.0. Use Each::of instead.
  */
 function each(
-    $iterable,
-    callable $onFulfilled = null,
-    callable $onRejected = null
+	$iterable,
+	callable $onFulfilled = null,
+	callable $onRejected = null
 ) {
-    return Each::of($iterable, $onFulfilled, $onRejected);
+	return Each::of( $iterable, $onFulfilled, $onRejected );
 }
 
 /**
@@ -283,12 +270,12 @@ function each(
  * @deprecated each_limit will be removed in guzzlehttp/promises:2.0. Use Each::ofLimit instead.
  */
 function each_limit(
-    $iterable,
-    $concurrency,
-    callable $onFulfilled = null,
-    callable $onRejected = null
+	$iterable,
+	$concurrency,
+	callable $onFulfilled = null,
+	callable $onRejected = null
 ) {
-    return Each::ofLimit($iterable, $concurrency, $onFulfilled, $onRejected);
+	return Each::ofLimit( $iterable, $concurrency, $onFulfilled, $onRejected );
 }
 
 /**
@@ -305,11 +292,11 @@ function each_limit(
  * @deprecated each_limit_all will be removed in guzzlehttp/promises:2.0. Use Each::ofLimitAll instead.
  */
 function each_limit_all(
-    $iterable,
-    $concurrency,
-    callable $onFulfilled = null
+	$iterable,
+	$concurrency,
+	callable $onFulfilled = null
 ) {
-    return Each::ofLimitAll($iterable, $concurrency, $onFulfilled);
+	return Each::ofLimitAll( $iterable, $concurrency, $onFulfilled );
 }
 
 /**
@@ -319,9 +306,8 @@ function each_limit_all(
  *
  * @deprecated is_fulfilled will be removed in guzzlehttp/promises:2.0. Use Is::fulfilled instead.
  */
-function is_fulfilled(PromiseInterface $promise)
-{
-    return Is::fulfilled($promise);
+function is_fulfilled( PromiseInterface $promise ) {
+	return Is::fulfilled( $promise );
 }
 
 /**
@@ -331,9 +317,8 @@ function is_fulfilled(PromiseInterface $promise)
  *
  * @deprecated is_rejected will be removed in guzzlehttp/promises:2.0. Use Is::rejected instead.
  */
-function is_rejected(PromiseInterface $promise)
-{
-    return Is::rejected($promise);
+function is_rejected( PromiseInterface $promise ) {
+	return Is::rejected( $promise );
 }
 
 /**
@@ -343,9 +328,8 @@ function is_rejected(PromiseInterface $promise)
  *
  * @deprecated is_settled will be removed in guzzlehttp/promises:2.0. Use Is::settled instead.
  */
-function is_settled(PromiseInterface $promise)
-{
-    return Is::settled($promise);
+function is_settled( PromiseInterface $promise ) {
+	return Is::settled( $promise );
 }
 
 /**
@@ -357,7 +341,6 @@ function is_settled(PromiseInterface $promise)
  *
  * @deprecated coroutine will be removed in guzzlehttp/promises:2.0. Use Coroutine::of instead.
  */
-function coroutine(callable $generatorFn)
-{
-    return Coroutine::of($generatorFn);
+function coroutine( callable $generatorFn ) {
+	return Coroutine::of( $generatorFn );
 }
