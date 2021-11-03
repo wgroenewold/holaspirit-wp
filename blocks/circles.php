@@ -9,7 +9,9 @@ $circles_img  = get_field( 'block_circles_img' );
 $circles_link = get_field( 'block_circles_link' );
 
 // create id attribute for specific styling
-$id = 'circles-' . $block['id'];
+if ( ! empty( $block ) ) {
+	$id = 'circles-' . $block['id'];
+}
 
 // create align class ("alignwide") from block setting ("wide")
 $align_class = $block['align'] ? 'align' . $block['align'] : '';

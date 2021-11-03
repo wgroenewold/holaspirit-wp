@@ -24,6 +24,7 @@ class Holaspirit_Admin {
 		add_action( 'init', array( $this, 'create_posttype' ), 10, 0 );
 		add_action( 'init', array( $this, 'create_taxonomy' ), 10, 0 );
 		add_action( 'admin_enqueue_scripts', array( $this, 'admin_scripts' ), 10, 0 );
+		add_action( 'wp_enqueue_scripts', array( $this, 'frontend_scripts' ), 10, 0 );
 		add_action( 'wp_ajax_generate_token', array( $this, 'generate_token' ), 10, 0 );
 		add_action( 'token_cron_hook', array( $this, 'token_cron_execute' ), 10, 0 );
 		add_action( 'acf/init', array( $this, 'add_acf_blocks' ), 10, 0 );
@@ -101,6 +102,13 @@ class Holaspirit_Admin {
 	}
 
 	/**
+	 * Add some frontend assets.
+	 */
+	public function frontend_scripts() {
+		wp_enqueue_style( 'holaspirit-frontend-css', plugins_url( '../assets/css/holaspirit-frontend.css', __FILE__ ), array(), '1.0.0' );
+	}
+
+	/**
 	 * AJAX callback to generate a token.
 	 */
 	public function generate_token() {
@@ -166,6 +174,6 @@ class Holaspirit_Admin {
 	public function acf_block_callback( $block ) {
 		$slug = str_replace( 'acf/', '', $block['name'] );
 
-		include plugins_url( "../blocks/$slug.php", __FILE__ );
+		include( HOLASPIRIT_ROOT . "/blocks/$slug.php" );
 	}
 }
